@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Language, User, Exchange
 from .forms import LanguageForm, UserForm, ExchangeForm
 
-# Prikaz svih jezika i mogućnost pretrage
+
+# 1. Funkcijski prikazi
 def index(request):
     search_query = request.GET.get('search', '')
     if search_query:
@@ -17,20 +20,17 @@ def index(request):
         form.save()
         return redirect('index')
 
-
-    # Dobijanje svih korisnika i razmjena
     users = User.objects.all()
     exchanges = Exchange.objects.all()
 
     return render(request, 'index.html', {
-        'languages': languages, 
+        'languages': languages,
         'form': form,
         'users': users,
         'exchanges': exchanges
     })
 
-    s
-# Uređivanje jezika
+
 def edit_language(request, id):
     language = get_object_or_404(Language, id=id)
     if request.method == 'POST':
@@ -43,7 +43,7 @@ def edit_language(request, id):
 
     return render(request, 'edit_language.html', {'form': form})
 
-# Brisanje jezika
+
 def delete_language(request, id):
     language = get_object_or_404(Language, id=id)
     if request.method == 'POST':
@@ -52,7 +52,7 @@ def delete_language(request, id):
 
     return render(request, 'confirm_delete.html', {'language': language})
 
-# Dodavanje korisnika
+
 def add_user(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
@@ -63,7 +63,7 @@ def add_user(request):
         form = UserForm()
     return render(request, 'add_user.html', {'form': form})
 
-# Dodavanje razmjene jezika
+
 def add_exchange(request):
     if request.method == 'POST':
         form = ExchangeForm(request.POST)
@@ -74,73 +74,85 @@ def add_exchange(request):
         form = ExchangeForm()
     return render(request, 'add_exchange.html', {'form': form})
 
-# Prikaz svih razmjenas
-def exchange_list(request):
-    exchanges = Exchange.objects.all()
-    return render(request, 'exchange_list.html', {'exchanges': exchanges})
 
+# 2. Generički prikazi
 
-
-from django.views.generic import ListView, DetailView
-from .models import Language, User, Exchange
-
-# Generički ListView za Language model
+# ListView za jezike
 class LanguageListView(ListView):
     model = Language
     template_name = 'language_list.html'
     context_object_name = 'languages'
     paginate_by = 10
 
-    # Filtriranje po imenu jezika
     def get_queryset(self):
         query = self.request.GET.get('search', '')
         return Language.objects.filter(name__icontains=query) if query else Language.objects.all()
 
-# Generički DetailView za Language model
+
 class LanguageDetailView(DetailView):
     model = Language
     template_name = 'language_detail.html'
     context_object_name = 'language'
-    
-    
-    # Dodaj relacije u context
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['exchanges'] = self.object.exchanges.all()  # Pristupa svim razmjenama za jezik
+        context['exchanges'] = self.object.exchanges.all()
         return context
 
-# Generički ListView za User model
+
+# ListView i DetailView za korisnike
 class UserListView(ListView):
     model = User
     template_name = 'user_list.html'
     context_object_name = 'users'
     paginate_by = 10
 
-    # Filtriranje po korisničkom imenu
     def get_queryset(self):
         query = self.request.GET.get('search', '')
         return User.objects.filter(username__icontains=query) if query else User.objects.all()
 
-# Generički DetailView za User model
+
 class UserDetailView(DetailView):
     model = User
     template_name = 'user_detail.html'
     context_object_name = 'user'
 
-# Generički ListView za Exchange model
+
+# ListView i DetailView za razmjene
 class ExchangeListView(ListView):
     model = Exchange
     template_name = 'exchange_list.html'
     context_object_name = 'exchanges'
     paginate_by = 10
 
-    # Filtriranje po datumu
     def get_queryset(self):
         query = self.request.GET.get('search', '')
         return Exchange.objects.filter(language__name__icontains=query) if query else Exchange.objects.all()
 
-# Generički DetailView za Exchange model
+
 class ExchangeDetailView(DetailView):
     model = Exchange
     template_name = 'exchange_detail.html'
     context_object_name = 'exchange'
+
+
+# 3. Generički CRUD prikazi za jezike
+
+class LanguageCreateView(CreateView):
+    model = Language
+    form_class = LanguageForm
+    template_name = 'language_form.html'
+    success_url = reverse_lazy('language_list')
+
+
+class LanguageUpdateView(UpdateView):
+    model = Language
+    form_class = LanguageForm
+    template_name = 'language_form.html'
+    success_url = reverse_lazy('language_list')
+
+
+class LanguageDeleteView(DeleteView):
+    model = Language
+    template_name = 'language_confirm_delete.html'
+    success_url = reverse_lazy('language_list')
