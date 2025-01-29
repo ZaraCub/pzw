@@ -1,5 +1,10 @@
 from django.urls import path
 from . import views
+from .views import (
+    LanguageListCreateAPIView, LanguageRetrieveUpdateDestroyAPIView,
+    UserListCreateAPIView, UserRetrieveUpdateDestroyAPIView,
+    ExchangeListCreateAPIView, ExchangeRetrieveUpdateDestroyAPIView
+)
 
 urlpatterns = [
     # Funkcijski prikazi
@@ -21,4 +26,14 @@ urlpatterns = [
 
     path('exchanges/', views.ExchangeListView.as_view(), name='exchange_list'),
     path('exchanges/<int:pk>/', views.ExchangeDetailView.as_view(), name='exchange_detail'),
+]
+
+
+urlpatterns += [
+    path('api/languages/', LanguageListCreateAPIView.as_view(), name='api_language_list_create'),
+    path('api/languages/<int:pk>/', LanguageRetrieveUpdateDestroyAPIView.as_view(), name='api_language_detail'),
+    path('api/users/', UserListCreateAPIView.as_view(), name='api_user_list_create'),
+    path('api/users/<int:pk>/', UserRetrieveUpdateDestroyAPIView.as_view(), name='api_user_detail'),
+    path('api/exchanges/', ExchangeListCreateAPIView.as_view(), name='api_exchange_list_create'),
+    path('api/exchanges/<int:pk>/', ExchangeRetrieveUpdateDestroyAPIView.as_view(), name='api_exchange_detail'),
 ]

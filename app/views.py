@@ -4,6 +4,10 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Language, User, Exchange
 from .forms import LanguageForm, UserForm, ExchangeForm
 
+from rest_framework import generics, permissions
+from .serializers import LanguageSerializer, UserSerializer, ExchangeSerializer
+
+
 
 # 1. Funkcijski prikazi
 def index(request):
@@ -156,3 +160,41 @@ class LanguageDeleteView(DeleteView):
     model = Language
     template_name = 'language_confirm_delete.html'
     success_url = reverse_lazy('language_list')
+
+
+# API za Language model
+class LanguageListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Language.objects.all()
+    serializer_class = LanguageSerializer
+    permission_classes = [permissions.IsAuthenticated]  # API je dostupan samo prijavljenim korisnicima
+
+
+class LanguageRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Language.objects.all()
+    serializer_class = LanguageSerializer
+    permission_classes = [permissions.IsAuthenticated]  # API je dostupan samo prijavljenim korisnicima
+
+# API za User model
+class UserListCreateAPIView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class UserRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+# API za Exchange model
+class ExchangeListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Exchange.objects.all()
+    serializer_class = ExchangeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ExchangeRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Exchange.objects.all()
+    serializer_class = ExchangeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
